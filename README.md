@@ -45,6 +45,9 @@ The system communicates with a webpage using **PubNub's publish/subscribe model*
 ---
 
 ## System Architecture
+
+![Wiring Diagram](./media/greenhouse_architecture_diagram.png)
+
 - The **IoT device (Raspberry Pi)** handles:
   - Sensor readings
   - Actuator control
@@ -93,3 +96,25 @@ The system communicates with a webpage using **PubNub's publish/subscribe model*
 #### Web Server:
 - User data is stored in a MySQL database, all passwords are hashed and them stored.
 - Keys are stored in a .env file and excluded from version control.
+
+---
+## Running
+
+### Create a Virtual enviorment in flask_app & hardware directorys
+linux
+```
+python3 -m venv venv
+
+source venv/bin/activate
+```
+
+### Dependancys
+#### Flask App:
+```
+pip install flask flask-sqlalchemy flask-bcrypt mysqlclient pubnub requests python-dotenv
+```
+
+#### Raspberry Pi
+```
+pip install gpiozero pubnub python-dotenv adafruit-circuitpython-dht
+```

@@ -31,9 +31,9 @@ with app.app_context():
     db.create_all() # create tables if not exist
 
 # PubNub config
-PUBLISH_KEY = os.getenv("PUBNUB_PUBLISH_KEY", "demo")
-SUBSCRIBE_KEY = os.getenv("PUBNUB_SUBSCRIBE_KEY", "demo")
-DEVICE_ID = os.getenv("PUBNUB_UUID", "greenhouse_web")
+PUBLISH_KEY = os.getenv("PUBNUB_PUBLISH_KEY")
+SUBSCRIBE_KEY = os.getenv("PUBNUB_SUBSCRIBE_KEY")
+DEVICE_ID = os.getenv("PUBNUB_UUID")
 
 # initialise PubNub
 pnconfig = PNConfiguration()
@@ -121,6 +121,7 @@ def login_is_required(function):
         else:
             return function(*args, **kwargs)
     return wrapper
+
 
 # routes
 @app.route("/")
@@ -217,7 +218,6 @@ def dashboard():
                          state=greenhouse_state,
                          username=session.get("name"),
                          is_admin=is_user_admin)
-
 
 
 # API Routes
