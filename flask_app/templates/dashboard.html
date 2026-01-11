@@ -10,6 +10,13 @@
     <h1>Greenhouse Dashboard</h1>
     
     <div>
+        <p>Welcome, {{ username }}! 
+            {% if is_admin %}(Admin){% endif %}
+            <a href="{{ url_for('logout') }}">Logout</a>
+        </p>
+    </div>
+    
+    <div>
         <h2>Device Status</h2>
         <p>Status: <span id="device-status">{{ 'Online' if state.device_online else 'Offline' }}</span></p>
     </div>
