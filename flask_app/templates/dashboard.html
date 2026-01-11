@@ -5,58 +5,73 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Greenhouse Dashboard</title>
     <link href="../static/images/leaf_icon.png" rel="icon" type="image/png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- https://tailwindcss.com/plus/ui-blocks/application-ui -->
 </head>
-<body>
-    <h1>Greenhouse Dashboard</h1>
-    
-    <div>
-        <p>Welcome, {{ username }}! 
-            {% if is_admin %}(Admin){% endif %}
-            <a href="{{ url_for('logout') }}">Logout</a>
-        </p>
+<body class="bg-gradient-to-br from-green-50 to-blue-50 min-h-screen p-6">
+    <div class="max-w-6xl mx-auto">
+        <div class="flex justify-between items-center mb-8">
+            <h1 class="text-4xl font-bold text-green-700">Greenhouse Dashboard</h1>
+            <div class="text-right">
+                <p class="text-gray-700">Welcome, <span class="font-semibold">{{ username }}</span>{% if is_admin %} <span class="text-yellow-600">(Admin)</span>{% endif %}</p>
+                <a href="{{ url_for('logout') }}" class="text-red-600 hover:text-red-700 font-semibold">Logout</a>
+            </div>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+            <div class="bg-white p-6 rounded-lg shadow-lg">
+                <h2 class="text-xl font-bold text-gray-800 mb-3">Device Status</h2>
+                <p class="text-lg"><span id="device-status" class="font-semibold text-green-600">{{ 'Online' if state.device_online else 'Offline' }}</span></p>
+            </div>
+            
+            <div class="bg-white p-6 rounded-lg shadow-lg">
+                <h2 class="text-xl font-bold text-gray-800 mb-3">Temperature</h2>
+                <p id="dashboard-temp" class="text-3xl font-bold text-orange-500">{{ state.temperature }}°C</p>
+                <p class="text-sm text-gray-600 mt-2">Last updated: <span id="temp-time">{{ state.last_update }}</span></p>
+            </div>
+            
+            <div class="bg-white p-6 rounded-lg shadow-lg">
+                <h2 class="text-xl font-bold text-gray-800 mb-3">Humidity</h2>
+                <p id="dashboard-humidity" class="text-3xl font-bold text-blue-500">{{ state.humidity }}%</p>
+                <p class="text-sm text-gray-600 mt-2">Last updated: <span id="humidity-time">{{ state.last_update }}</span></p>
+            </div>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div class="bg-white p-6 rounded-lg shadow-lg">
+                <h2 class="text-xl font-bold text-gray-800 mb-4">Light Control</h2>
+                <div class="space-x-2">
+                    <button onclick="sendCommand('led_on')" class="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-2 px-4 rounded-lg transition">Turn Light On</button>
+                    <button onclick="sendCommand('led_off')" class="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded-lg transition">Turn Light Off</button>
+                </div>
+            </div>
+            
+            <div class="bg-white p-6 rounded-lg shadow-lg">
+                <h2 class="text-xl font-bold text-gray-800 mb-4">Actions</h2>
+                <div class="space-x-2">
+                    <button onclick="sendCommand('water')" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition">Water Plants</button>
+                    <button onclick="sendCommand('refresh')" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg transition">Refresh Data</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white p-6 rounded-lg shadow-lg mb-6">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">Status Info</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <p class="text-gray-700">Last watered: <span id="dashboard-last-watered" class="font-semibold">{{ state.last_watered }}</span></p>
+                <p class="text-gray-700">System time: <span id="current-time" class="font-semibold">{{ state.last_update }}</span></p>
+            </div>
+        </div>
+        
+        <div id="message" class="bg-blue-100 text-blue-800 p-4 rounded-lg mb-4 hidden"></div>
     </div>
-    
-    <div>
-        <h2>Device Status</h2>
-        <p>Status: <span id="device-status">{{ 'Online' if state.device_online else 'Offline' }}</span></p>
-    </div>
-    
-    <div>
-        <h2>Temperature</h2>
-        <p id="dashboard-temp">{{ state.temperature }}°C</p>
-        <p>Last updated: <span id="temp-time">{{ state.last_update }}</span></p>
-    </div>
-    
-    <div>
-        <h2>Humidity</h2>
-        <p id="dashboard-humidity">{{ state.humidity }}%</p>
-        <p>Last updated: <span id="humidity-time">{{ state.last_update }}</span></p>
-    </div>
-    
-    <div>
-        <h2>LED Control</h2>
-        <p id="dashboard-led-status">{% if state.led_status %}ON{% else %}OFF{% endif %}</p>
-        <button onclick="sendCommand('led_on')">Turn LED On</button>
-        <button onclick="sendCommand('led_off')">Turn LED Off</button>
-    </div>
-    
-    <div>
-        <h2>Actions</h2>
-        <button onclick="sendCommand('water')">Water Plants</button>
-        <button onclick="sendCommand('refresh')">Refresh Data</button>
-    </div>
-    
-    <div>
-        <h2>Status Info</h2>
-        <p>Last watered: <span id="dashboard-last-watered">{{ state.last_watered }}</span></p>
-        <p>System time: <span id="current-time">{{ state.last_update }}</span></p>
-    </div>
-    
-    <div id="message"></div>
     
     <script>
         function showMessage(message) {
-            document.getElementById('message').textContent = message;
+            const msgEl = document.getElementById('message');
+            msgEl.textContent = message;
+            msgEl.classList.remove('hidden');
+            setTimeout(() => msgEl.classList.add('hidden'), 3000);
         }
         
         function sendCommand(command) {
@@ -86,10 +101,12 @@
                     document.getElementById('humidity-time').textContent = data.last_update;
                     
                     document.getElementById('dashboard-led-status').textContent = data.led_status ? 'ON' : 'OFF';
+                    document.getElementById('dashboard-led-status').className = data.led_status ? 'font-semibold text-yellow-500' : 'font-semibold text-gray-500';
                     
                     document.getElementById('dashboard-last-watered').textContent = data.last_watered;
                     
                     document.getElementById('device-status').textContent = data.device_online ? 'Online' : 'Offline';
+                    document.getElementById('device-status').className = data.device_online ? 'font-semibold text-green-600' : 'font-semibold text-red-600';
                     
                     document.getElementById('current-time').textContent = new Date().toLocaleTimeString();
                 });
