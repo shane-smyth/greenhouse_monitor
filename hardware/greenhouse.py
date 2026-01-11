@@ -59,7 +59,7 @@ def init_pubnub(on_command_received):
         
         def status(self, pubnub, status):
             if status.category == PNStatusCategory.PNConnectedCategory:
-                print("✅ Connected to PubNub")
+                print("Connected to PubNub")
     
     # subscribe to commands
     pubnub_instance.add_listener(CommandListener())
@@ -196,7 +196,7 @@ def handle_command(command, params):
         # turn LED off
         led.off()
         led_status = False
-        print("💡 LED turned OFF")
+        print("LED turned OFF")
         publish_acknowledgment("led_off", True, "LED turned off")
         
     elif command in ['water', 'water_plants', 'irrigate']:

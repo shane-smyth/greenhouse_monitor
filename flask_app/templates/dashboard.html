@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Greenhouse Dashboard</title>
+    <link href="../static/images/leaf_icon.png" rel="icon" type="image/png">
+</head>
+<body>
+    <h1>Greenhouse Dashboard</h1>
+    
+    <div>
+        <p>Welcome, {{ username }}! 
+            {% if is_admin %}(Admin){% endif %}
+            <a href="{{ url_for('logout') }}">Logout</a>
+        </p>
+    </div>
+    
+    <div>
+        <h2>Device Status</h2>
+        <p>Status: <span id="device-status">{{ 'Online' if state.device_online else 'Offline' }}</span></p>
+    </div>
+    
+    <div>
+        <h2>Temperature</h2>
+        <p id="dashboard-temp">{{ state.temperature }}°C</p>
+        <p>Last updated: <span id="temp-time">{{ state.last_update }}</span></p>
+    </div>
+    
+    <div>
+        <h2>Humidity</h2>
+        <p id="dashboard-humidity">{{ state.humidity }}%</p>
+        <p>Last updated: <span id="humidity-time">{{ state.last_update }}</span></p>
+    </div>
+    
+    <div>
+        <h2>LED Control</h2>
+        <p id="dashboard-led-status">{% if state.led_status %}ON{% else %}OFF{% endif %}</p>
+        <button onclick="sendCommand('led_on')">Turn LED On</button>
+        <button onclick="sendCommand('led_off')">Turn LED Off</button>
+    </div>
+    
+    <div>
+        <h2>Actions</h2>
+        <button onclick="sendCommand('water')">Water Plants</button>
+        <button onclick="sendCommand('refresh')">Refresh Data</button>
+    </div>
+    
+    <div>
+        <h2>Status Info</h2>
+        <p>Last watered: <span id="dashboard-last-watered">{{ state.last_watered }}</span></p>
+        <p>System time: <span id="current-time">{{ state.last_update }}</span></p>
+    </div>
+    
+    <div id="message"></div>
+    
+    <script>
+        function showMessage(message) {
+            document.getElementById('message').textContent = message;
+        }
+        
+        function sendCommand(command) {
+            fetch('/api/command', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({command: command})
+            })
+            .then(response => response.json())
+            .then(data => {
+                showMessage(data.message);
+                setTimeout(updateDashboard, 1000);
+            })
+            .catch(error => {
+                showMessage('Error: ' + error);
+            });
+        }
+        
+        function updateDashboard() {
+            fetch('/api/state')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('dashboard-temp').textContent = data.temperature + '°C';
+                    document.getElementById('temp-time').textContent = data.last_update;
+                    
+                    document.getElementById('dashboard-humidity').textContent = data.humidity + '%';
+                    document.getElementById('humidity-time').textContent = data.last_update;
+                    
+                    document.getElementById('dashboard-led-status').textContent = data.led_status ? 'ON' : 'OFF';
+                    
+                    document.getElementById('dashboard-last-watered').textContent = data.last_watered;
+                    
+                    document.getElementById('device-status').textContent = data.device_online ? 'Online' : 'Offline';
+                    
+                    document.getElementById('current-time').textContent = new Date().toLocaleTimeString();
+                });
+        }
+        
+        setInterval(updateDashboard, 30000);
+        
+        setInterval(() => {
+            document.getElementById('current-time').textContent = new Date().toLocaleTimeString();
+        }, 1000);
+        
+        updateDashboard();
+    </script>
+</body>
+</html>
